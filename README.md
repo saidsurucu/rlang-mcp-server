@@ -2,6 +2,8 @@
 
 A comprehensive Model Context Protocol (MCP) server for R data visualization and analysis, built with Python and FastMCP.
 
+*🌐 [Türkçe](README_TR.md) | **English***
+
 ## Overview
 
 This project is inspired by [gdbelvin's rlang-mcp-server](https://github.com/gdbelvin/rlang-mcp-server) but is a complete Python reimplementation using the FastMCP framework. While the original Go version provided basic R visualization tools, this Python version extends the functionality with comprehensive file management capabilities and enhanced user experience.
