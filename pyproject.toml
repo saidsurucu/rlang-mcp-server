@@ -33,6 +33,7 @@ dev = [
 
 [project.scripts]
 r-server-mcp = "r_server:mcp.run"
+rlang-mcp-python = "r_server:mcp.run"
 
 [build-system]
 requires = ["hatchling"]
