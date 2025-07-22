@@ -28,7 +28,7 @@ This project is inspired by [gdbelvin's rlang-mcp-server](https://github.com/gdb
 - **Automatic Dependencies**: Smart package dependency resolution
 
 ### 🛡️ **Security & Isolation**
-- **Docker Support**: Optional containerized execution for enhanced security
+- **Docker Support**: Required containerized execution for enhanced security
 - **File Type Validation**: Whitelist-based file upload security
 - **Size Limits**: Configurable file size restrictions
 - **Path Sanitization**: Protection against directory traversal attacks
@@ -63,7 +63,7 @@ brew install python@3.12
 # Install required R packages
 Rscript -e "install.packages(c('ggplot2', 'cowplot', 'readxl', 'writexl', 'dplyr', 'tidyr'), repos='https://cran.r-project.org')"
 
-# Optional: Install Docker for containerized execution
+# Install Docker (required for secure execution)
 brew install --cask docker
 ```
 
@@ -82,7 +82,7 @@ pip install uv
 # Install required R packages (run in R console or RStudio)
 install.packages(c('ggplot2', 'cowplot', 'readxl', 'writexl', 'dplyr', 'tidyr'), repos='https://cran.r-project.org')
 
-# Optional: Install Docker Desktop
+# Install Docker Desktop (required for secure execution)
 # Download from: https://www.docker.com/products/docker-desktop
 ```
 
@@ -104,7 +104,7 @@ pip install uv
 # Install required R packages
 sudo Rscript -e "install.packages(c('ggplot2', 'cowplot', 'readxl', 'writexl', 'dplyr', 'tidyr'), repos='https://cran.r-project.org')"
 
-# Optional: Install Docker
+# Install Docker (required for secure execution)
 sudo apt install docker.io
 sudo systemctl start docker
 sudo systemctl enable docker
@@ -132,7 +132,7 @@ pip install git+https://github.com/saidsurucu/rlang-mcp-python
 - **Python 3.12+**
 - **R 4.0+** with packages: ggplot2, cowplot, readxl, writexl, dplyr, tidyr
 - **uv** (recommended) or pip for package management
-- **Docker** (optional, for containerized execution)
+- **Docker** (required for secure containerized execution)
 
 ### Running the Server
 
@@ -234,7 +234,7 @@ ggplot(mtcars, aes(x=wt, y=mpg, color=factor(cyl))) +
 
 ## Docker Support
 
-For enhanced security and isolation:
+Docker is required for secure execution:
 
 ```bash
 # Build Docker image

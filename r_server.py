@@ -15,12 +15,7 @@ import tempfile
 from pathlib import Path
 from typing import Optional, Literal
 
-try:
-    import docker
-    DOCKER_AVAILABLE = True
-except ImportError:
-    DOCKER_AVAILABLE = False
-    print("Warning: Docker not available, Docker execution disabled", file=sys.stderr)
+import docker
 
 from fastmcp import FastMCP
 
@@ -516,8 +511,6 @@ def execute_r_script_docker(r_code: str, host_temp_dir: str = None) -> tuple[str
     Returns:
         Tuple of (stdout, stderr, return_code)
     """
-    if not DOCKER_AVAILABLE:
-        raise RuntimeError("Docker is not available. Please install docker package or use use_docker=False")
     
     try:
         client = docker.from_env()

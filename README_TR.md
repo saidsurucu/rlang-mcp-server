@@ -33,7 +33,7 @@ Bu proje [gdbelvin'in rlang-mcp-server](https://github.com/gdbelvin/rlang-mcp-se
 - **Otomatik Bağımlılık**: Akıllı paket bağımlılık çözümü
 
 ### 🛡️ **Güvenlik ve İzolasyon**
-- **Docker Desteği**: Gelişmiş güvenlik için opsiyonel konteyner çalıştırma
+- **Docker Desteği**: Gelişmiş güvenlik için zorunlu konteyner çalıştırma
 - **Dosya Tipi Doğrulama**: Whitelist tabanlı dosya yükleme güvenliği
 - **Boyut Limitleri**: Yapılandırılabilir dosya boyutu kısıtlamaları
 - **Path Sanitization**: Directory traversal saldırılarına karşı koruma
@@ -68,7 +68,7 @@ brew install python@3.12
 # Gerekli R paketlerini kurun
 Rscript -e "install.packages(c('ggplot2', 'cowplot', 'readxl', 'writexl', 'dplyr', 'tidyr'), repos='https://cran.r-project.org')"
 
-# Opsiyonel: Konteyner çalıştırma için Docker
+# Docker kurun (güvenli çalıştırma için gerekli)
 brew install --cask docker
 ```
 
@@ -87,7 +87,7 @@ pip install uv
 # Gerekli R paketlerini kurun (R konsolu veya RStudio'da çalıştırın)
 install.packages(c('ggplot2', 'cowplot', 'readxl', 'writexl', 'dplyr', 'tidyr'), repos='https://cran.r-project.org')
 
-# Opsiyonel: Docker Desktop
+# Docker Desktop kurun (güvenli çalıştırma için gerekli)
 # Şuradan indirin: https://www.docker.com/products/docker-desktop
 ```
 
@@ -109,7 +109,7 @@ pip install uv
 # Gerekli R paketlerini kurun
 sudo Rscript -e "install.packages(c('ggplot2', 'cowplot', 'readxl', 'writexl', 'dplyr', 'tidyr'), repos='https://cran.r-project.org')"
 
-# Opsiyonel: Docker kurun
+# Docker kurun (güvenli çalıştırma için gerekli)
 sudo apt install docker.io
 sudo systemctl start docker
 sudo systemctl enable docker
@@ -137,7 +137,7 @@ pip install git+https://github.com/saidsurucu/rlang-mcp-python
 - **Python 3.12+**
 - **R 4.0+** ve paketler: ggplot2, cowplot, readxl, writexl, dplyr, tidyr
 - **uv** (önerilen) veya pip paket yönetimi için
-- **Docker** (opsiyonel, konteyner çalıştırma için)
+- **Docker** (güvenli konteyner çalıştırma için gerekli)
 
 ### Sunucuyu Çalıştırma
 
@@ -239,7 +239,7 @@ ggplot(mtcars, aes(x=wt, y=mpg, color=factor(cyl))) +
 
 ## Docker Desteği
 
-Gelişmiş güvenlik ve izolasyon için:
+Güvenli çalıştırma için Docker gereklidir:
 
 ```bash
 # Docker imajını oluştur
