@@ -75,10 +75,11 @@ python -m r_server
 
 ## Tools Available
 
-This server provides **7 comprehensive tools**:
+This server provides **8 comprehensive tools**:
 
 | Tool | Description | Category |
 |------|-------------|----------|
+| `mount_directory` | Mount a local directory for R operations | Directory Management |
 | `upload_file` | Upload files to R workspace | File Management |
 | `list_files` | List and filter workspace files | File Management |  
 | `file_info` | Get detailed file information | File Management |
@@ -111,15 +112,32 @@ Add to your `claude_desktop_config.json`:
 
 ### Usage Examples
 
-**Upload and analyze data:**
+**Mount directory and work with local files:**
 ```python
-# Upload an Excel file
-upload_file(file_content="<base64_content>", filename="data.xlsx")
+# Mount a local directory
+mount_directory("/Users/you/Documents/r-projects/analysis")
 
-# Analyze the data
+# List available files
+list_files(file_type="excel")
+
+# Work with mounted files directly
 execute_r_script("""
 library(readxl)
-data <- read_excel("./r_workspace/data.xlsx")
+# Files are accessible from mounted directory
+data <- read_excel("data.xlsx")
+summary(data)
+""")
+```
+
+**Upload and analyze data:**
+```python
+# Upload an Excel file to workspace
+upload_file(file_content="<base64_content>", filename="data.xlsx")
+
+# Analyze the uploaded data
+execute_r_script("""
+library(readxl)
+data <- read_excel("r_workspace/data.xlsx")
 summary(data)
 head(data)
 """)
@@ -173,7 +191,8 @@ uv run mypy r_server.py
 
 | Feature | Original (Go) | This Version (Python) |
 |---------|---------------|----------------------|
-| Core Tools | 2 | **7** |
+| Core Tools | 2 | **8** |
+| Directory Mounting | ❌ | ✅ |
 | File Management | ❌ | ✅ |
 | Package Management | ❌ | ✅ |
 | File Upload | ❌ | ✅ |

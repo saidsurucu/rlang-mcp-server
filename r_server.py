@@ -27,6 +27,9 @@ from fastmcp import FastMCP
 # Create the FastMCP server
 mcp = FastMCP("R-Server MCP")
 
+# Global variable to store mounted directory
+MOUNTED_DIRECTORY = None
+
 # Check and install R packages automatically
 def ensure_r_packages():
     """Check if required R packages are installed and install them if missing."""
@@ -106,6 +109,94 @@ except Exception as e:
 OutputFormat = Literal["png", "jpeg", "pdf", "svg"]
 
 @mcp.tool
+def mount_directory(
+    directory_path: str
+) -> dict:
+    """
+    Mount a directory for R workspace operations.
+    
+    Args:
+        directory_path: Path to the directory to mount (must be absolute path)
+    
+    Returns:
+        Dictionary with mount status and details
+    """
+    global MOUNTED_DIRECTORY
+    from pathlib import Path
+    import os
+    
+    try:
+        # Convert to Path object
+        mount_path = Path(directory_path).resolve()
+        
+        # Security checks
+        if not mount_path.is_absolute():
+            return {
+                "success": False,
+                "message": "Path must be absolute",
+                "details": f"Provided path: {directory_path}"
+            }
+        
+        # Check if directory exists
+        if not mount_path.exists():
+            return {
+                "success": False,
+                "message": "Directory does not exist",
+                "details": f"Path not found: {mount_path}"
+            }
+        
+        if not mount_path.is_dir():
+            return {
+                "success": False,
+                "message": "Path is not a directory",
+                "details": f"Path is a file: {mount_path}"
+            }
+        
+        # Check read permissions
+        if not os.access(mount_path, os.R_OK):
+            return {
+                "success": False,
+                "message": "No read permission for directory",
+                "details": f"Cannot read: {mount_path}"
+            }
+        
+        # Set the mounted directory
+        MOUNTED_DIRECTORY = mount_path
+        
+        # Create r_workspace subdirectory if it doesn't exist
+        workspace_path = mount_path / "r_workspace"
+        workspace_path.mkdir(exist_ok=True)
+        
+        # List some files to confirm
+        files = list(mount_path.glob("*"))[:5]
+        file_names = [f.name for f in files]
+        
+        print(f"✓ Mounted directory: {mount_path}", file=sys.stderr)
+        
+        return {
+            "success": True,
+            "message": "Directory mounted successfully",
+            "mounted_path": str(mount_path),
+            "workspace_path": str(workspace_path),
+            "sample_files": file_names,
+            "total_files": len(list(mount_path.glob("*"))),
+            "details": f"R operations will now use this directory as base path"
+        }
+        
+    except Exception as e:
+        return {
+            "success": False,
+            "message": f"Failed to mount directory: {str(e)}",
+            "details": ""
+        }
+
+def get_working_directory():
+    """Get the current working directory for R operations."""
+    if MOUNTED_DIRECTORY:
+        return MOUNTED_DIRECTORY
+    return Path.cwd()
+
+@mcp.tool
 def upload_file(
     file_content: str,
     filename: str,
@@ -176,7 +267,8 @@ def upload_file(
             }
         
         # Create R working directory if needed
-        r_work_dir = Path("./r_workspace")
+        base_dir = get_working_directory()
+        r_work_dir = base_dir / "r_workspace"
         r_work_dir.mkdir(exist_ok=True)
         
         # Full file path
@@ -248,8 +340,9 @@ def list_files(
     from datetime import datetime
     
     try:
-        # Check both current directory and r_workspace
-        search_dirs = [Path("."), Path("./r_workspace")]
+        # Check both mounted directory and r_workspace
+        base_dir = get_working_directory()
+        search_dirs = [base_dir, base_dir / "r_workspace"]
         all_files = []
         
         type_patterns = {
@@ -319,11 +412,13 @@ def file_info(filename: str) -> dict:
     
     try:
         # Search in multiple locations
+        base_dir = get_working_directory()
         search_paths = [
-            Path(filename),
-            Path("./r_workspace") / filename,
-            Path(".") / filename
+            Path(filename) if Path(filename).is_absolute() else None,
+            base_dir / filename,
+            base_dir / "r_workspace" / filename
         ]
+        search_paths = [p for p in search_paths if p]  # Remove None
         
         file_path = None
         for path in search_paths:
@@ -551,11 +646,13 @@ def render_ggplot(
 library(ggplot2)
 library(cowplot)
 
-# Set working directory to check for uploaded files
-if (file.exists("./r_workspace")) {{
-  # Add both current and workspace to file search paths
-  original_wd <- getwd()
-  workspace_files <- list.files("./r_workspace", full.names = TRUE)
+# Set working directory based on mounted path
+base_dir <- "{get_working_directory()}"
+setwd(base_dir)
+workspace_dir <- file.path(base_dir, "r_workspace")
+
+if (dir.exists(workspace_dir)) {{
+  workspace_files <- list.files(workspace_dir, full.names = TRUE)
   if (length(workspace_files) > 0) {{
     cat("Found uploaded files:", paste(basename(workspace_files), collapse=", "), "\\n")
   }}
@@ -649,15 +746,19 @@ def execute_r_script(
         # Enhanced R script with smart file handling
         enhanced_code = f"""
 # Smart file handling setup
-if (file.exists("./r_workspace")) {{
+base_dir <- "{get_working_directory()}"
+setwd(base_dir)
+workspace_dir <- file.path(base_dir, "r_workspace")
+
+if (dir.exists(workspace_dir)) {{
   # List available uploaded files
-  workspace_files <- list.files("./r_workspace", full.names = FALSE)
+  workspace_files <- list.files(workspace_dir, full.names = FALSE)
   if (length(workspace_files) > 0) {{
     cat("📁 Available uploaded files:", paste(workspace_files, collapse=", "), "\\n")
     
     # Helper function to read files from workspace
     read_workspace_file <- function(filename) {{
-      file_path <- file.path("./r_workspace", filename)
+      file_path <- file.path(workspace_dir, filename)
       if (file.exists(file_path)) {{
         return(file_path)
       }} else {{
@@ -665,7 +766,7 @@ if (file.exists("./r_workspace")) {{
         similar_files <- workspace_files[grepl(gsub("\\\\..*", "", filename), workspace_files, ignore.case = TRUE)]
         if (length(similar_files) > 0) {{
           cat("⚠️ File '", filename, "' not found, but similar files available: ", paste(similar_files, collapse=", "), "\\n")
-          return(file.path("./r_workspace", similar_files[1]))
+          return(file.path(workspace_dir, similar_files[1]))
         }}
         return(NULL)
       }}
